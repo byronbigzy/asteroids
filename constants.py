@@ -16,3 +16,8 @@ PLAYER_RADIUS = 20
 PLAYER_TURN_SPEED = 300
 # Player movement speed
 PLAYER_SPEED = 200
+#Player shooting speed
+PLAYER_SHOOT_SPEED = 500
+
+# **BULLET CONFIG**
+SHOT_RADIUS = 5

@@ -1,52 +1,60 @@
-import pygame  # Import pygame for game development
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT  # Import screen dimensions from constants.py
-from player import Player  # Import the Player class
+import pygame
+from constants import *
+from player import Player
+from asteroid import Asteroid
+from asteroidfield import AsteroidField
+from shot import Shot
+
 
 def main():
-    # Print initial debug messages
-    print("Starting asteroids!")
-    print("Screen width:", SCREEN_WIDTH)
-    print("Screen height:", SCREEN_HEIGHT)
-
-    pygame.init()  # Initialize all pygame modules
-
-    # Create the game window with the specified width and height
+    pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-
-    # Create a clock object to control the frame rate
     clock = pygame.time.Clock()
 
-    # Set the initial position of the player at the center of the screen
-    x = SCREEN_WIDTH / 2
-    y = SCREEN_HEIGHT / 2
+    updatable = pygame.sprite.Group()
+    drawable = pygame.sprite.Group()
+    asteroids = pygame.sprite.Group()
+    shots = pygame.sprite.Group()
 
-    # Create an instance of the Player class
-    player = Player(x, y)
+    Asteroid.containers = (asteroids, updatable, drawable)
+    Shot.containers = (shots, updatable, drawable)
+    AsteroidField.containers = updatable
+    asteroid_field = AsteroidField()
 
-    # Main game loop
-    running = True
-    while running:
-        screen.fill((0, 0, 0))  # Clear the screen by filling it with black
+    Player.containers = (updatable, drawable)
 
-        # Handle events (e.g., quitting the game)
+    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+
+    dt = 0
+
+    while True:
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:  # If the close button is clicked
-                running = False  # Exit the game loop
+            if event.type == pygame.QUIT:
+                return
 
-        # Draw the player on the screen
-        player.draw(screen)
+        updatable.update(dt)
 
-        # Update the display to show the new frame
+        for asteroid in asteroids:
+            for shot in shots:
+                if shot.collisionCheck(asteroid):
+                    asteroid.split()
+                    shot.kill()
+
+            if asteroid.collisionCheck(player):
+                print("Game Over!")
+                return
+
+
+        screen.fill("black")
+
+        for obj in drawable:
+            obj.draw(screen)
+
         pygame.display.flip()
 
-        # Limit the game to 60 frames per second (FPS)
-        dt = clock.tick(60) / 1000  # `dt` represents time elapsed per frame (in seconds)
+        # limit the framerate to 60 FPS
+        dt = clock.tick(60) / 1000
 
-        player.update(dt)
 
-    # Quit pygame when the game loop ends
-    pygame.quit()
-
-# Run the game if this script is executed directly
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
